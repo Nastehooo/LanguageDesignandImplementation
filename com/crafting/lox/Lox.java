@@ -1,5 +1,5 @@
 //> Main class for running the Lox interpreter  
-package com.crafting interpreters.lox;
+package com.crafting.lox;
 
 import java.io.BufferedReader;
 import java.io.IOException;
