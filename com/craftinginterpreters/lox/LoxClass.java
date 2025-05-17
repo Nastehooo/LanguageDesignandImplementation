@@ -1,4 +1,4 @@
-package com.crafting.lox;
+package com.craftinginterpreters.lox;
 //> Classes lox-class
 
 

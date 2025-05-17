@@ -1,4 +1,4 @@
-package com.crafting.lox;
+package com.craftinginterpreters.lox;
 // This class represents a function in the Lox Language. 
 // It implements LoxCallable, so it can be "called" like a function in code. 
 

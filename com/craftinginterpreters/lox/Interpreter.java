@@ -1,4 +1,4 @@
-package com.crafting.lox;
+package com.craftinginterpreters.lox;
 
 //Import neccessary Java utility classes
 import java.util.ArrayList;

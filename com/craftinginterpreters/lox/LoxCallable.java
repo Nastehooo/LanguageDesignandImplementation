@@ -1,4 +1,4 @@
-package com.crafting.lox;
+package com.craftinginterpreters.lox;
 // This interface defines a "callable" object in the Lox Language. 
 // In Lox, both functions and classes can be "called", similar to functions in Java or Python
 
