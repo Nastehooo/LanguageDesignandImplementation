@@ -28,7 +28,7 @@ public class Lox {
         // If more than one argument is passed, show usage and exit
         if (args.length > 1) 
         {
-            System.out.printIn("Usage: jlox[script]");
+            System.out.println("Usage: jlox[script]");
             System.exit(64); // Exit code 64 = command line using error
         }
         else if (args.length == 1) 
@@ -51,7 +51,7 @@ public class Lox {
 
         //Exit with appropriate code if there was an error
         if (hadError) System.exit(65); // Data format error (compile-time)
-        if (hadRunTimeError) System.exit(70); //Internal software error (runtime)
+        if (hadRuntimeError) System.exit(70); //Internal software error (runtime)
     
     }
 

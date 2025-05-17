@@ -29,7 +29,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     Interpreter(){
         globals.define("clock", new LoxCallable() {
             @Override
-            public init arity() {
+            public int arity() {
                 return 0;
             }
 
@@ -159,7 +159,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
         Object value = evaluate(stmt.expression);
-        System.out.printIn(stringify(value));
+        System.out.println(stringify(value));
         return null; 
     }
 
