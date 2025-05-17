@@ -98,7 +98,7 @@ class Environment {
      * @param name Variable name 
      * @return The variable's value. 
      */
-    Object getAt(int distnace, String name){
+    Object getAt(int distance, String name){
         return ancestor(distance).values.get(name);
     }
 

@@ -267,7 +267,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
 
         LoxCallable function = (LoxCallable)callee; 
-        if (arguments.size() != function.arrity()) {
+        if (arguments.size() != function.arity()) {
             throw new RuntimeError(expr.paren, 
             "Expected " + function.arity() + "arguments but got " + 
             arguments.size() + ".");
@@ -296,7 +296,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         if (object instanceof Double){
             String text = object.toString();
             if (text.endsWith(".0")){
-                text = text.substring(0, text.lenght() - 2);
+                text = text.substring(0, text.length() - 2);
             }
             return text; 
         }
