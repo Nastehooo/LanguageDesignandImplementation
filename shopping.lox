@@ -1,22 +1,12 @@
-// Initialize variables
-var is_running = true;
-var shopping_list = "";
+var x = 0;
 
-// Loop while is_running is true
-while (is_running) {
-  var item = "apple"; // Simulated input
-
-  if (item == "") {
-    is_running = false;
-  } else {
-    if (shopping_list == "") {
-      shopping_list = item;
-    } else {
-      shopping_list = shopping_list + ", " + item;
-    }
-    is_running = false; // Prevent infinite loop
-  }
+while (x < 3) {
+  print x;
+  x = x + 1;
 }
 
-// Print final shopping list
-print shopping_list;
+if (x == 3) {
+  print "done!";
+} else {
+  print "not done!";
+}
