@@ -6,16 +6,20 @@ import java.util.List;
 import static com.craftinginterpreters.lox.TokenType.*;
 
 class Parser {
+    // Exception used internally for parse errors
     private static class ParseError extends RuntimeException {}
 
     private final List<Token> tokens;
     private int current = 0;
+    private final boolean debug = true; // Toggle this to enable/disable debug logs
 
     Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
 
-    // Entry point to parse tokens into a list of statements
+    /**
+     * Entry point: Parses a list of statements from tokens.
+     */
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
@@ -24,19 +28,24 @@ class Parser {
         return statements;
     }
 
-    // Parses a declaration; handles error recovery with synchronize()
+    /**
+     * Parses a declaration (e.g., variable declaration).
+     * If an error occurs, synchronize to prevent cascading failures.
+     */
     private Stmt declaration() {
         try {
             if (match(VAR)) return varDeclaration();
             return statement();
         } catch (ParseError error) {
-            System.out.println("[declaration] Parse error occurred, synchronizing...");
-            synchronize(); // recover from error
+            log("[declaration] Parse error occurred, synchronizing...");
+            synchronize();
             return null;
         }
     }
 
-    // Parses a variable declaration statement
+    /**
+     * Parses a variable declaration: `var name = value;`
+     */
     private Stmt varDeclaration() {
         Token name = consume(IDENTIFIER, "Expect variable name.");
         Expr initializer = null;
@@ -47,78 +56,88 @@ class Parser {
         return new Stmt.Var(name, initializer);
     }
 
-    // Parses general statements like print or expression statements
+    /**
+     * Parses a general statement (e.g., print, if, while, block, or expression).
+     */
     private Stmt statement() {
         if (match(PRINT)) return printStatement();
-        if (match(IF)) return ifStatement();     
+        if (match(IF)) return ifStatement();
         if (match(WHILE)) return whileStatement();
+        if (match(LEFT_BRACE)) return block();
         return expressionStatement();
     }
 
+    /**
+     * Parses an `if` statement: `if (condition) { ... } else { ... }`
+     */
     private Stmt ifStatement() {
         consume(LEFT_PAREN, "Expect '(' after 'if'.");
         Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after if condition.");
-    
+
         Stmt thenBranch = statement();
         Stmt elseBranch = null;
         if (match(ELSE)) {
             elseBranch = statement();
         }
-    
+
         return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
+    /**
+     * Parses a `while` loop: `while (condition) { body }`
+     */
     private Stmt whileStatement() {
         consume(LEFT_PAREN, "Expect '(' after 'while'.");
         Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after condition.");
-    
-        // Ensure it recognizes block statements
-        Stmt body;
-        if (match(LEFT_BRACE)) {
-            body = block(); // Parse statements inside {}
-        } else {
-            body = statement(); // Single statement case
-        }
-    
+
+        Stmt body = statement(); // Body can be a block or single statement
         return new Stmt.While(condition, body);
     }
 
+    /**
+     * Parses a block of statements wrapped in `{ ... }`
+     */
     private Stmt block() {
         List<Stmt> statements = new ArrayList<>();
-    
-        while (!isAtEnd() && !match(RIGHT_BRACE)) {
-            statements.add(declaration()); // Parse statements inside the block
-        }
-    
-        consume(RIGHT_BRACE, "Expect '}' after block.");
-        return new Stmt.Block(statements); // Wrap in Block statement
-    }
-    
-    
-    
 
-    // Parses a print statement
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after block.");
+        return new Stmt.Block(statements);
+    }
+
+    /**
+     * Parses a print statement: `print expression;`
+     */
     private Stmt printStatement() {
         Expr value = expression();
         consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
     }
 
-    // Parses an expression as a statement
+    /**
+     * Parses a plain expression followed by a semicolon.
+     */
     private Stmt expressionStatement() {
         Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
     }
 
-    // Parses an expression (starting point for expressions)
+    /**
+     * Parses an expression, starting from the highest precedence: assignment.
+     */
     private Expr expression() {
         return assignment();
     }
 
-    // Parses assignment expressions
+    /**
+     * Parses an assignment expression like `a = b`.
+     */
     private Expr assignment() {
         Expr expr = equality();
 
@@ -126,8 +145,7 @@ class Parser {
             Token equals = previous();
             Expr value = assignment();
 
-            // Debug: print left expression type and token
-            System.out.println("[assignment] Left expression: " + expr.getClass().getSimpleName());
+            log("[assignment] Left expression: " + expr.getClass().getSimpleName());
 
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable)expr).name;
@@ -140,7 +158,9 @@ class Parser {
         return expr;
     }
 
-    // Parses equality expressions (==, !=)
+    /**
+     * Parses equality expressions: `==`, `!=`
+     */
     private Expr equality() {
         Expr expr = comparison();
 
@@ -153,7 +173,9 @@ class Parser {
         return expr;
     }
 
-    // Parses comparison expressions (<, >, <=, >=)
+    /**
+     * Parses comparison expressions: `<`, `<=`, `>`, `>=`
+     */
     private Expr comparison() {
         Expr expr = term();
 
@@ -166,7 +188,9 @@ class Parser {
         return expr;
     }
 
-    // Parses addition and subtraction expressions
+    /**
+     * Parses addition and subtraction: `+`, `-`
+     */
     private Expr term() {
         Expr expr = factor();
 
@@ -179,7 +203,9 @@ class Parser {
         return expr;
     }
 
-    // Parses multiplication and division expressions
+    /**
+     * Parses multiplication and division: `*`, `/`
+     */
     private Expr factor() {
         Expr expr = unary();
 
@@ -192,7 +218,9 @@ class Parser {
         return expr;
     }
 
-    // Parses unary expressions (!, -)
+    /**
+     * Parses unary expressions: `-x`, `!x`
+     */
     private Expr unary() {
         if (match(BANG, MINUS)) {
             Token operator = previous();
@@ -203,7 +231,9 @@ class Parser {
         return primary();
     }
 
-    // Parses primary expressions: literals, variables, parentheses
+    /**
+     * Parses literals, variable names, or grouped expressions.
+     */
     private Expr primary() {
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE)) return new Expr.Literal(true);
@@ -226,73 +256,91 @@ class Parser {
         throw error(peek(), "Expect expression.");
     }
 
-    // Checks if current token matches any of the given types and advances if so
+    /**
+     * If the current token matches any of the given types, consume it and return true.
+     */
     private boolean match(TokenType... types) {
         for (TokenType type : types) {
             if (check(type)) {
                 advance();
-                System.out.println("[match] Matched token: " + type);
+                log("[match] Matched token: " + type);
                 return true;
             }
         }
         return false;
     }
 
-    // Consumes a token of the expected type or throws an error
+    /**
+     * Consumes a token if it matches the expected type; otherwise throws a parse error.
+     */
     private Token consume(TokenType type, String message) {
         if (check(type)) {
             Token token = advance();
-            System.out.println("[consume] Consumed token: " + token.lexeme);
+            log("[consume] Consumed token: " + token.lexeme);
             return token;
         }
 
         throw error(peek(), message);
     }
 
-    // Checks if current token is of the given type without consuming it
+    /**
+     * Returns true if the current token is of the given type.
+     */
     private boolean check(TokenType type) {
         if (isAtEnd()) return false;
         return peek().type == type;
     }
 
-    // Advances to the next token and returns the previous one
+    /**
+     * Advances the parser to the next token and returns the previous one.
+     */
     private Token advance() {
         if (!isAtEnd()) current++;
         Token previousToken = previous();
-        System.out.println("[advance] Advanced to token: " + peek().lexeme);
+        log("[advance] Advanced to token: " + peek().lexeme);
         return previousToken;
     }
 
-    // Returns true if all tokens have been consumed
+    /**
+     * Returns true if we’ve consumed all tokens.
+     */
     private boolean isAtEnd() {
         return peek().type == EOF;
     }
 
-    // Returns the current token without consuming it
+    /**
+     * Returns the current token.
+     */
     private Token peek() {
         return tokens.get(current);
     }
 
-    // Returns the previous token
+    /**
+     * Returns the token just before the current one.
+     */
     private Token previous() {
         return tokens.get(current - 1);
     }
 
-    // Creates a ParseError and reports the error message
+    /**
+     * Reports an error at a specific token.
+     */
     private ParseError error(Token token, String message) {
         Lox.error(token, message);
-        System.out.println("[error] Error at token '" + token.lexeme + "': " + message);
+        log("[error] Error at token '" + token.lexeme + "': " + message);
         return new ParseError();
     }
 
-    // Synchronizes parser after an error to avoid cascading failures
+    /**
+     * Skips tokens until we find a statement boundary.
+     */
     private void synchronize() {
-        System.out.println("[synchronize] Synchronizing at token: " + peek().lexeme);
+        log("[synchronize] Synchronizing at token: " + peek().lexeme);
         advance();
 
         while (!isAtEnd()) {
             if (previous().type == SEMICOLON) {
-                System.out.println("[synchronize] Found semicolon, resuming normal parsing.");
+                log("[synchronize] Found semicolon, resuming normal parsing.");
                 return;
             }
 
@@ -305,20 +353,23 @@ class Parser {
                 case WHILE:
                 case PRINT:
                 case RETURN:
-                    System.out.println("[synchronize] Found statement boundary: " + peek().lexeme);
+                    log("[synchronize] Found statement boundary: " + peek().lexeme);
                     return;
-                    
-                 default:
-                 // Continue skipping tokens until we find a boundary
-                 break;
+                default:
+                    break;
             }
-                
 
-
-            System.out.println("[synchronize] Skipping token: " + peek().lexeme);
+            log("[synchronize] Skipping token: " + peek().lexeme);
             advance();
         }
 
-        System.out.println("[synchronize] Reached end of tokens while synchronizing.");
+        log("[synchronize] Reached end of tokens while synchronizing.");
+    }
+
+    /**
+     * Outputs a debug log message if debug is enabled.
+     */
+    private void log(String message) {
+        if (debug) System.out.println(message);
     }
 }
