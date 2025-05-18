@@ -14,26 +14,26 @@ class LoxFunction implements LoxCallable {
     private final Environment closure;
 
     // Used to determine if this function is actually an initialiser (i.e., a constructor)
-    private final boolean isInitialiser;
+    private final boolean isInitializer;
 
     // Constructor for LoxFunction. It receives; 
     // - declaration: the syntax tree of the function
     // - closure: the environment where it was created
     // - isInitialiser: whether it is used to initialise a class instance
-    LoxFunction(Stmt.Function declaration, Environment closure, boolean isInitialiser) {
+    LoxFunction(Stmt.Function declaration, Environment closure, boolean isInitializer) {
         this.declaration = declaration;
         this.closure = closure;
-        this.isInitialiser = isInitialiser;
+        this.isInitializer = isInitializer;
     }
 
     // This method is used when a function is bound to a class instnace. 
     // It creates a new environment where "this" refers to the given instance. 
     LoxFunction bind (LoxInstance instance) {
-        Environment environment = new Evironment(closure);
+        Environment environment = new Environment(closure);
         environment.define("this", instance);
 
         // Return a new LoxFunction bound to the instance (with the same declaration).
-        return new LoxFunction(declaration, environment, isInitialiser);
+        return new LoxFunction(declaration, environment, isInitializer);
 
     }
 
@@ -46,7 +46,7 @@ class LoxFunction implements LoxCallable {
 
     // Returns the number of parameters this function expects. 
     @Override
-    public init arity() {
+    public int arity() {
         return declaration.params.size();
     }
 
@@ -68,13 +68,13 @@ class LoxFunction implements LoxCallable {
         } catch (Return returnValue) {
             // If a return value is caught, return it-unless this is an initialiser, 
             // in which case we always return "this".
-            if (thisInitialiser) return closure.getAt(0, "this");
+            if (isInitializer) return closure.getAt(0, "this");
             return returnValue.value;
         }
         
         // If no return was thrown, return "this" if this is an initialiser,
         // otherwise return null (no value).
-        if (isInitialiser) return closure.getAt(O, "this");
+        if (isInitializer) return closure.getAt(0, "this");
         return null;
 
     }

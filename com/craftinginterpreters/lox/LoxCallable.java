@@ -2,7 +2,6 @@ package com.craftinginterpreters.lox;
 // This interface defines a "callable" object in the Lox Language. 
 // In Lox, both functions and classes can be "called", similar to functions in Java or Python
 
- interpreters.lox;
 
 import java.util.List;
 
@@ -19,5 +18,5 @@ interface LoxCallable {
     // - 'interpreter' is the current interpreter running the program. 
     // - 'arguments' is the list of values passed in when the function or class is called. 
     // It returns an Object, which could be the result of the function execution or a new instance (in the case of a class). 
-    Object call (Interpreter interpreter, List<object> arguments);
+    Object call (Interpreter interpreter, List<Object> arguments);
 }

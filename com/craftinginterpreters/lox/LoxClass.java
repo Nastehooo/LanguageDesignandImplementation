@@ -1,82 +1,71 @@
 package com.craftinginterpreters.lox;
-//> Classes lox-class
-
 
 import java.util.List;
 import java.util.Map;
 
 // This class represents a user-defined class in the Lox Language.
-// It implements the LoxCallable interface meaning it can be called like a function.
-
+// It implements the LoxCallable interface, meaning instances of this class
+// can be "called" like functions (usually to create new instances).
 class LoxClass implements LoxCallable {
 
-    // The name of the class. e.g., "Person", "Animal", etc.
+    // The name of the class (e.g., "Person", "Animal", etc.)
     final String name;
 
-    // If this class inherits from another, this will reference the superclass. 
-    final LoxClass superclass; 
+    // The superclass, if this class inherits from another class. Null if none.
+    final LoxClass superclass;
 
-    //A map of method names to their corresponding LoxFunction objects (i.e., the class's methods).
-    private final Map<String, LoxFunction> methods; 
+    // A map from method names to LoxFunction objects representing the class's methods.
+    private final Map<String, LoxFunction> methods;
 
-    //Constructor to create a new LoxClass. It takes;
-    // - the class name,
-    // - the optional superclass (null if no inheritance),
-    // - and a map of methods that belong to this class.
-    LoxClass(String name, LoxClass superclass, 
-             Map<String, LoxFuncion> methods) {
-                this.name = name; 
-                this.superclass = superclass;
-                this.methods = methods;
+    // Constructor to create a new LoxClass.
+    // Takes the class name, optional superclass, and the map of methods.
+    LoxClass(String name, LoxClass superclass, Map<String, LoxFunction> methods) {
+        this.name = name;
+        this.superclass = superclass;
+        this.methods = methods;
     }
 
-    // This method is used to find a method by name.
-    // If the method is defined in this class, it returns it.
-    // If not, and there is a superclass, it recursively checks the superclass. 
-    LoxFunction findMethod(String name)
-    {
+    // Finds a method by name in this class or any superclass.
+    LoxFunction findMethod(String name) {
         if (methods.containsKey(name)) {
             return methods.get(name);
         }
-
         if (superclass != null) {
             return superclass.findMethod(name);
         }
-
-        return null; //Method not found. 
+        return null; // Method not found
     }
 
-    // Returns the class name when the object is printed or logged. 
-    @Override 
-    public String toString() {
-        return name; 
-    }
-
-    // This mehtod is called when the class is "called" (i.e, instantiated).
-    // It creates a new instance of the class and calls it initialiser (if one exists).
+    // Returns the class name when printing or logging the class object.
     @Override
-    public Object call (Intepreter interpreter
-                        List<Object> arguments){
+    public String toString() {
+        return name;
+    }
+
+    // This method is called when the class is "called" like a function (i.e., instantiated).
+    // It creates a new instance of this class and calls its initializer ("init") if present.
+    @Override
+    public Object call(Interpreter interpreter, List<Object> arguments) {
+        // Create a new instance of this class
         LoxInstance instance = new LoxInstance(this);
 
-        // If the class has an "init" method (constructor), call it with the arguments. 
-        LoxFunction initialiser = findMethod("init");
-        if (initialiser != null){
-            initialiser.bind(instance).call(interpreter, arguments);
+        // Look for the initializer method ("init")
+        LoxFunction initializer = findMethod("init");
+        if (initializer != null) {
+            // Bind the initializer to the new instance and call it with arguments
+            initializer.bind(instance).call(interpreter, arguments);
         }
 
-        return instance; // Return the new instance 
-
+        // Return the new instance
+        return instance;
     }
 
-    // Returns the number of parameters required by the "init" method.
-    // This defines how many arguments must be passed when the class is called. 
+    // Returns the number of arguments expected by the initializer ("init") method.
+    // If there is no initializer, returns 0.
     @Override
-    public init arity() {
-        LoxFunction initialiser = findMethod("init");
-        if (initialiser == null) return 0;
-        return initialiser.arity();
+    public int arity() {
+        LoxFunction initializer = findMethod("init");
+        if (initializer == null) return 0;
+        return initializer.arity();
     }
 }
-
-

@@ -207,6 +207,7 @@ abstract class Expr {
 
     final Token operator; // Operator like '-' or '!'
     final Expr right;     // Operand the operator is applied to
+    public Expr left;
   }
 
   // Variable expression: e.g., `x`

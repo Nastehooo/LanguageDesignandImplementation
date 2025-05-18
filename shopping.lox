@@ -1,0 +1,22 @@
+// Initialize variables
+var is_running = true;
+var shopping_list = "";
+
+// Loop while is_running is true
+while (is_running) {
+  var item = "apple"; // Simulated input
+
+  if (item == "") {
+    is_running = false;
+  } else {
+    if (shopping_list == "") {
+      shopping_list = item;
+    } else {
+      shopping_list = shopping_list + ", " + item;
+    }
+    is_running = false; // Prevent infinite loop
+  }
+}
+
+// Print final shopping list
+print shopping_list;

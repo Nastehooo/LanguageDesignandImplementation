@@ -9,8 +9,9 @@ import java.util.Map;
  * for method lookup and binding.
  */
 
- class LoxInstace {
-    private LoxClass (()klass; // Reference to the class this instance is based on.
+ class LoxInstance {
+    private final LoxClass klass; // Reference to the class this instance is based on.
+    private final Map<String, Object> fields = new HashMap<>();
     
         // A map to store instance fields (variable name to value)
     
@@ -64,7 +65,7 @@ import java.util.Map;
          * 
          * @return A string like "ClassName instance".
          */
-        @Overrride
+        @Override
         public String toString(){
             return klass.name + " instance";
     }
