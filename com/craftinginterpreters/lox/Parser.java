@@ -73,10 +73,30 @@ class Parser {
         consume(LEFT_PAREN, "Expect '(' after 'while'.");
         Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after condition.");
-        Stmt body = statement();
+    
+        // Ensure it recognizes block statements
+        Stmt body;
+        if (match(LEFT_BRACE)) {
+            body = block(); // Parse statements inside {}
+        } else {
+            body = statement(); // Single statement case
+        }
     
         return new Stmt.While(condition, body);
     }
+
+    private Stmt block() {
+        List<Stmt> statements = new ArrayList<>();
+    
+        while (!isAtEnd() && !match(RIGHT_BRACE)) {
+            statements.add(declaration()); // Parse statements inside the block
+        }
+    
+        consume(RIGHT_BRACE, "Expect '}' after block.");
+        return new Stmt.Block(statements); // Wrap in Block statement
+    }
+    
+    
     
 
     // Parses a print statement
