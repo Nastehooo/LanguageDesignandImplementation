@@ -1,6 +1,7 @@
 package com.craftinginterpreters.lox;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * AstPrinter is a utility class used to convert the Lox abstract syntax tree (AST)
@@ -46,6 +47,49 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     builder.append(")");
     return builder.toString();
   }
+
+  @Override
+  public String visitLoxListExpr(Expr.LoxList expr) {
+      // Convert the LoxList expression into a string representation.
+      // Format: [elem1, elem2, elem3, ...]
+      StringBuilder builder = new StringBuilder();
+      builder.append("[");
+      for (int i = 0; i < expr.elements.size(); i++) {
+          builder.append(expr.elements.get(i).accept(this)); // Recursively convert each element.
+          if (i < expr.elements.size() - 1) {
+              builder.append(", ");  // Add comma separator between elements.
+          }
+      }
+      builder.append("]");
+      return builder.toString();
+  }
+
+  @Override
+  public String visitLoxDictExpr(Expr.LoxDict expr) {
+      // Convert the LoxDict expression into a string representation.
+      // Format: {key1: value1, key2: value2, ...}
+      StringBuilder builder = new StringBuilder();
+      builder.append("{");
+      int count = 0;
+      int size = expr.entries.size();
+      for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
+          // Convert the key expression to string
+          builder.append(entry.getKey().accept(this));
+          builder.append(": ");
+          // Convert the value expression to string
+          builder.append(entry.getValue().accept(this));
+          if (count < size - 1) {
+              builder.append(", "); // Add comma separator between entries.
+          }
+          count++;
+      }
+      builder.append("}");
+      return builder.toString();
+  }
+
+
+ 
+
 
   // Expression statement: (; <expression>)
   @Override

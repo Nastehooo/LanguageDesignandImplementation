@@ -1,0 +1,9 @@
+var list = [1.0, 2.0, 3.0, 4.0];
+print list;
+
+var dict = {
+  "name": "Alice",
+  "age": 30.0,
+  "isStudent": false
+};
+print dict;

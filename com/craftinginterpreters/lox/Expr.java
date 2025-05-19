@@ -1,18 +1,10 @@
-//> Appendix II expr
 package com.craftinginterpreters.lox;
 
 import java.util.List;
+import java.util.Map;
 
-/**
- * Abstract base class for all expression nodes in the AST (Abstract Syntax Tree).
- * Follows the Visitor design pattern for type-safe expression evaluation or transformation.
- */
 abstract class Expr {
 
-  /**
-   * Visitor interface defines a visit method for each concrete Expr subclass.
-   * It allows separating the expression evaluation logic from the structure.
-   */
   interface Visitor<R> {
     R visitAssignExpr(Assign expr);
     R visitBinaryExpr(Binary expr);
@@ -26,12 +18,12 @@ abstract class Expr {
     R visitThisExpr(This expr);
     R visitUnaryExpr(Unary expr);
     R visitVariableExpr(Variable expr);
+
+    // New methods for list and dict
+    R visitLoxListExpr(LoxList expr);
+    R visitLoxDictExpr(LoxDict expr);
   }
 
-  // Each of the following static classes represents a different kind of expression in the language.
-  // They all extend the abstract Expr base class and implement the accept method for the Visitor pattern.
-
-  // Assignment expression: e.g., `x = 5`
   static class Assign extends Expr {
     Assign(Token name, Expr value) {
       this.name = name;
@@ -43,11 +35,10 @@ abstract class Expr {
       return visitor.visitAssignExpr(this);
     }
 
-    final Token name;   // Variable being assigned to
-    final Expr value;   // Value being assigned
+    final Token name;
+    final Expr value;
   }
 
-  // Binary expression: e.g., `a + b`
   static class Binary extends Expr {
     Binary(Expr left, Token operator, Expr right) {
       this.left = left;
@@ -65,7 +56,6 @@ abstract class Expr {
     final Expr right;
   }
 
-  // Function or method call: e.g., `foo(1, 2)`
   static class Call extends Expr {
     Call(Expr callee, Token paren, List<Expr> arguments) {
       this.callee = callee;
@@ -78,12 +68,11 @@ abstract class Expr {
       return visitor.visitCallExpr(this);
     }
 
-    final Expr callee;            // Function being called
-    final Token paren;            // Closing parenthesis (for error reporting)
-    final List<Expr> arguments;   // Arguments passed to the function
+    final Expr callee;
+    final Token paren;
+    final List<Expr> arguments;
   }
 
-  // Accessing a property from an object: e.g., `object.property`
   static class Get extends Expr {
     Get(Expr object, Token name) {
       this.object = object;
@@ -95,11 +84,10 @@ abstract class Expr {
       return visitor.visitGetExpr(this);
     }
 
-    final Expr object;  // Object from which property is accessed
-    final Token name;   // Name of the property
+    final Expr object;
+    final Token name;
   }
 
-  // Grouping expression: e.g., `(a + b)`
   static class Grouping extends Expr {
     Grouping(Expr expression) {
       this.expression = expression;
@@ -110,10 +98,9 @@ abstract class Expr {
       return visitor.visitGroupingExpr(this);
     }
 
-    final Expr expression;  // The inner expression
+    final Expr expression;
   }
 
-  // Literal expression: e.g., `123`, `"hello"`, `true`
   static class Literal extends Expr {
     Literal(Object value) {
       this.value = value;
@@ -124,10 +111,9 @@ abstract class Expr {
       return visitor.visitLiteralExpr(this);
     }
 
-    final Object value;  // The actual literal value
+    final Object value;
   }
 
-  // Logical expression: e.g., `a && b` or `a || b`
   static class Logical extends Expr {
     Logical(Expr left, Token operator, Expr right) {
       this.left = left;
@@ -145,7 +131,6 @@ abstract class Expr {
     final Expr right;
   }
 
-  // Setting a property on an object: e.g., `object.property = value`
   static class Set extends Expr {
     Set(Expr object, Token name, Expr value) {
       this.object = object;
@@ -158,12 +143,11 @@ abstract class Expr {
       return visitor.visitSetExpr(this);
     }
 
-    final Expr object;  // Object whose property is being set
-    final Token name;   // Property name
-    final Expr value;   // Value to assign
+    final Expr object;
+    final Token name;
+    final Expr value;
   }
 
-  // Refers to the superclass's method: e.g., `super.method()`
   static class Super extends Expr {
     Super(Token keyword, Token method) {
       this.keyword = keyword;
@@ -175,11 +159,10 @@ abstract class Expr {
       return visitor.visitSuperExpr(this);
     }
 
-    final Token keyword; // 'super' keyword token
-    final Token method;  // The method being accessed in the superclass
+    final Token keyword;
+    final Token method;
   }
 
-  // Refers to the current object: e.g., `this`
   static class This extends Expr {
     This(Token keyword) {
       this.keyword = keyword;
@@ -190,10 +173,9 @@ abstract class Expr {
       return visitor.visitThisExpr(this);
     }
 
-    final Token keyword; // 'this' keyword token
+    final Token keyword;
   }
 
-  // Unary expression: e.g., `-a`, `!b`
   static class Unary extends Expr {
     Unary(Token operator, Expr right) {
       this.operator = operator;
@@ -205,12 +187,10 @@ abstract class Expr {
       return visitor.visitUnaryExpr(this);
     }
 
-    final Token operator; // Operator like '-' or '!'
-    final Expr right;     // Operand the operator is applied to
-    public Expr left;
+    final Token operator;
+    final Expr right;
   }
 
-  // Variable expression: e.g., `x`
   static class Variable extends Expr {
     Variable(Token name) {
       this.name = name;
@@ -221,9 +201,36 @@ abstract class Expr {
       return visitor.visitVariableExpr(this);
     }
 
-    final Token name;  // Variable name token
+    final Token name;
   }
 
-  // Each expression node implements this method to accept a visitor
+  // New LoxList class
+  static class LoxList extends Expr {
+    LoxList(List<Expr> elements) {
+      this.elements = elements;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitLoxListExpr(this);
+    }
+
+    final List<Expr> elements;
+  }
+
+  // New LoxDict class
+  static class LoxDict extends Expr {
+    LoxDict(Map<Expr, Expr> entries) {
+      this.entries = entries;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitLoxDictExpr(this);
+    }
+
+    final Map<Expr, Expr> entries;
+  }
+
   abstract <R> R accept(Visitor<R> visitor);
 }

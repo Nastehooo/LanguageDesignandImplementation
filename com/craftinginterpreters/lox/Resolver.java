@@ -107,6 +107,30 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     // Not found; assume global.
   }
 
+  // -- Visitor methods for list and dictionary 
+  @Override
+  public Void visitLoxListExpr(Expr.LoxList expr) {
+      // Resolve each element expression in the list for variable bindings and scope.
+      for (Expr element : expr.elements) {
+          resolve(element);  // Recursively resolve the element expression.
+      }
+      return null;  // Void return for the resolver visitor.
+  }
+
+  @Override
+  public Void visitLoxDictExpr(Expr.LoxDict expr) {
+      // Resolve each key and value expression in the dictionary for variable bindings and scope.
+      for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
+          resolve(entry.getKey());   // Recursively resolve the key expression.
+          resolve(entry.getValue()); // Recursively resolve the value expression.
+      }
+      return null;  // Void return for the resolver visitor.
+  }
+
+
+
+
+
   // --- Visitor methods for statements ---
 
   @Override

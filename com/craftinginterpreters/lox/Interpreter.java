@@ -383,6 +383,31 @@ public Object visitBinaryExpr(Expr.Binary expr) {
     }
   }
 
+  @Override
+  public Object visitLoxListExpr(Expr.LoxList expr) {
+      // Evaluate each element expression in the list and collect the results.
+      List<Object> values = new ArrayList<>();
+      for (Expr element : expr.elements) {
+          values.add(evaluate(element));  // Evaluate element and add to list.
+      }
+      // Return the list of evaluated elements as the value of this expression.
+      return values;
+  }
+
+  @Override
+  public Object visitLoxDictExpr(Expr.LoxDict expr) {
+      // Evaluate each key and value expression in the dictionary and build a map.
+      Map<Object, Object> map = new HashMap<>();
+      for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
+          Object key = evaluate(entry.getKey());     // Evaluate the key expression.
+          Object value = evaluate(entry.getValue()); // Evaluate the value expression.
+          map.put(key, value);                        // Store the key-value pair in the map.
+      }
+      // Return the constructed map as the value of this dictionary expression.
+      return map;
+  }
+
+
   // Visit a variable expression (variable lookup)
   @Override
   public Object visitVariableExpr(Expr.Variable expr) {
@@ -442,5 +467,7 @@ public Object visitBinaryExpr(Expr.Binary expr) {
 
     return object.toString();
   }
+
+  
 }
 
