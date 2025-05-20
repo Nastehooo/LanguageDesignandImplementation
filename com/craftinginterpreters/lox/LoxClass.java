@@ -6,7 +6,7 @@ import java.util.Map;
 // This class represents a user-defined class in the Lox Language.
 // It implements the LoxCallable interface, meaning instances of this class
 // can be "called" like functions (usually to create new instances).
-class LoxClass implements LoxCallable {
+public class LoxClass implements LoxCallable {
 
     // The name of the class (e.g., "Person", "Animal", etc.)
     final String name;

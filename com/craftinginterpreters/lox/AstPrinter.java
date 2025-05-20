@@ -51,26 +51,46 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
   }
 
   @Override
+  public String visitSubscriptExpr(Expr.Subscript expr) {
+    return parenthesize2("subscript", expr.object, expr.index);
+  }
+
+
+  @Override
   public String visitLoxDictExpr(Expr.LoxDict expr) {
     StringBuilder builder = new StringBuilder();
-    builder.append("{");
-    int count = 0;
-    int size = expr.entries.size();
+    builder.append("{ ");
     for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
       builder.append(entry.getKey().accept(this));
       builder.append(": ");
       builder.append(entry.getValue().accept(this));
-      if (count < size - 1) builder.append(", ");
-      count++;
+      builder.append(", ");
     }
-    builder.append("}");
+    if (!expr.entries.isEmpty()) {
+      builder.setLength(builder.length() - 2); // remove trailing comma and space
+    }
+    builder.append(" }");
     return builder.toString();
   }
+
 
   @Override
   public String visitExpressionStmt(Stmt.Expression stmt) {
     return parenthesize(";", stmt.expression);
   }
+
+  @Override
+  public String visitAssignSubscriptExpr(Expr.AssignSubscript expr) {
+      // Represent assignment to subscript like "(assign-subscript <object> <index> <value>)"
+      return parenthesize("assignSubscript",
+      expr.target.object,
+      expr.target.index,
+      expr.value);
+
+  }
+  
+
+ 
 
   @Override
   public String visitFunctionStmt(Stmt.Function stmt) {

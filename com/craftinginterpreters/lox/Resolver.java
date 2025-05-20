@@ -70,6 +70,28 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     scopes.peek().put(name.lexeme, true);
   }
 
+  @Override
+  public Void visitSubscriptExpr(Expr.Subscript expr) {
+    resolve(expr.object);
+    resolve(expr.index);
+    return null;
+  }
+  
+  @Override
+  public Void visitAssignSubscriptExpr(Expr.AssignSubscript expr) {
+      // Resolve the target object's expression
+      resolve(expr.target.object);
+      // Resolve the index expression inside the subscript
+      resolve(expr.target.index);
+      // Resolve the value being assigned
+      resolve(expr.value);
+
+      return null; // Resolver methods usually return Void
+  }
+
+
+
+
   // Resolve a single statement.
   private void resolve(Stmt stmt) {
     stmt.accept(this);
@@ -118,12 +140,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitLoxDictExpr(Expr.LoxDict expr) {
-      for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
-          resolve(entry.getKey());
-          resolve(entry.getValue());
-      }
-      return null;
+  for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
+    resolve(entry.getKey());
+    resolve(entry.getValue());
   }
+  return null;
+}
 
   // --- Visitor methods for statements ---
 

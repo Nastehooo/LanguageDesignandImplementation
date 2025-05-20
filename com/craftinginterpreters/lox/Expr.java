@@ -20,6 +20,8 @@ abstract class Expr {
     R visitVariableExpr(Variable expr);
     R visitLoxListExpr(LoxList expr);
     R visitLoxDictExpr(LoxDict expr);
+    R visitSubscriptExpr(Subscript expr);
+    R visitAssignSubscriptExpr(AssignSubscript expr);
   }
 
   static class Assign extends Expr {
@@ -70,6 +72,7 @@ abstract class Expr {
       return visitor.visitCallExpr(this);
     }
   }
+
 
   static class Get extends Expr {
     final Expr object;
@@ -145,6 +148,43 @@ abstract class Expr {
       return visitor.visitSetExpr(this);
     }
   }
+
+  public static class Subscript extends Expr {
+    public final Expr object;
+    public final Token indexToken;
+    public final Expr index;
+
+    public Subscript(Expr object, Token indexToken, Expr index) {
+        this.object = object;
+        this.indexToken = indexToken;
+        this.index = index;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+        return visitor.visitSubscriptExpr(this);
+    }
+  }
+
+ 
+  public static class AssignSubscript extends Expr {
+    public final Expr.Subscript target;  // The subscript expression being assigned to
+    public final Expr value;             // The value being assigned
+
+    public AssignSubscript(Expr.Subscript target, Expr value) {
+        this.target = target;
+        this.value = value;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+        return visitor.visitAssignSubscriptExpr(this);
+    }
+  }
+
+
+  
+  
 
   static class Super extends Expr {
     final Token keyword;

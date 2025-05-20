@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   final Environment globals = new Environment();
   private Environment environment = globals;
@@ -12,15 +14,18 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   Interpreter() {
     globals.define("clock", new LoxCallable() {
-      @Override public int arity() { return 0; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
-        return (double) System.currentTimeMillis() / 1000.0;
-      }
-      @Override public String toString() { return "<native fn>"; }
+        @Override public int arity() { return 0; }
+        @Override public Object call(Interpreter interpreter, List<Object> arguments) {
+            return (double) System.currentTimeMillis() / 1000.0;
+        }
+        @Override public String toString() { return "<native fn>"; }
     });
 
-    globals.define("input", new InputFunction()); 
-  }
+    globals.define("input", new InputFunction());
+
+    // Add the native global "myList" here
+    globals.define("myList", new LoxList());
+}
 
   void interpret(List<Stmt> statements) {
     try {
@@ -55,6 +60,58 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
       this.environment = previous;
     }
   }
+
+  @Override
+  public Object visitSubscriptExpr(Expr.Subscript expr) {
+    Object object = evaluate(expr.object);
+    Object index = evaluate(expr.index);
+
+    if (object instanceof LoxList) {
+        LoxList list = (LoxList) object;
+        if (!(index instanceof Double)) {
+            throw new RuntimeError(expr.indexToken, "List index must be a number.");
+        }
+        int i = ((Double) index).intValue();
+        try {
+            return list.get(i);
+        } catch (IndexOutOfBoundsException e) {
+            throw new RuntimeError(expr.indexToken, "List index out of bounds.");
+        }
+    }
+
+    if (object instanceof LoxDict) {
+        LoxDict dict = (LoxDict) object;
+        if (!dict.containsKey(index)) {
+            throw new RuntimeError(expr.indexToken, "Key not found in dictionary.");
+        }
+        return dict.get(index);
+    }
+
+    throw new RuntimeError(expr.indexToken, "Only lists and dictionaries can be indexed.");
+  }
+
+  @Override
+  public Object visitAssignSubscriptExpr(Expr.AssignSubscript expr) {
+    Object object = evaluate(expr.target.object);
+    Object index = evaluate(expr.target.index);
+    Object value = evaluate(expr.value);
+
+    if (object instanceof LoxList) {
+        ((LoxList) object).set(expr.target.indexToken, index, value);
+        return value;
+    } else if (object instanceof LoxDict) {
+        ((LoxDict) object).put(index, value);
+        return value;
+    } else {
+        throw new RuntimeError(expr.target.indexToken, "Can only assign to list or dict elements.");
+    }
+}
+
+
+
+
+
+
 
   @Override
   public Void visitBlockStmt(Stmt.Block stmt) {
@@ -96,26 +153,30 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Object visitLoxDictExpr(Expr.LoxDict expr) {
-    // Assuming Expr.LoxDict has a field like Map<Expr, Expr> entries;
-    Map<Object, Object> map = new HashMap<>();
-    for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
-      Object key = evaluate(entry.getKey());
-      Object value = evaluate(entry.getValue());
-      map.put(key, value);
-    }
-    return map;
+      Map<Object, Object> map = new HashMap<>();
+      for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
+        Object key = evaluate(entry.getKey());
+        Object value = evaluate(entry.getValue());
+        map.put(key, value);
+      }
+    
+      return new LoxDict(map);
   }
+  
+
+
+
 
   
+  
   @Override
-  public Object visitLoxListExpr(Expr.LoxList expr) {
-    // Assuming Expr.LoxList has a List<Expr> elements;
-    List<Object> list = new ArrayList<>();
-    for (Expr element : expr.elements) {
-      list.add(evaluate(element));
-    }
-    return list;
+  public Object visitLoxListExpr(Expr.LoxList expr) {   
+  LoxList loxList = new LoxList();
+  for (Expr element : expr.elements) {
+    loxList.add(evaluate(element));
   }
+  return loxList;
+}
 
 
   @Override
@@ -316,22 +377,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
       LoxCallable function = (LoxCallable) callee;
 
       if (arguments.size() != function.arity()) {
-          throw new RuntimeError(expr.paren,
-              "Expected " + function.arity() + " arguments but got " + arguments.size() + ".");
+          throw new RuntimeError(expr.paren, "Expected " + function.arity() + " arguments but got " + arguments.size() + ".");
       }
 
-      return function.call(this, arguments); // this return is essential
-  }
-
-
-
-  @Override
-  public Object visitGetExpr(Expr.Get expr) {
-    Object object = evaluate(expr.object);
-    if (object instanceof LoxInstance) {
-      return ((LoxInstance) object).get(expr.name);
-    }
-    throw new RuntimeError(expr.name, "Only instances have properties.");
+      return function.call(this, arguments);
   }
 
   @Override
@@ -356,6 +405,25 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     return evaluate(expr.right);
   }
+
+ 
+  @Override
+  public Object visitGetExpr(Expr.Get expr) {
+    Object object = evaluate(expr.object);
+
+    if (object instanceof LoxInstance) {
+        return ((LoxInstance) object).get(expr.name);
+    }
+
+    if (object instanceof LoxList) {
+        return ((LoxList) object).get(expr.name);
+    }
+
+    throw new RuntimeError(expr.name, "Only instances have properties.");
+}
+
+
+
 
   @Override
   public Object visitSetExpr(Expr.Set expr) {

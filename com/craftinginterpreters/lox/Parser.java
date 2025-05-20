@@ -263,7 +263,7 @@ class Parser {
     
 
     private Expr assignment() {
-        Expr expr = or();  
+        Expr expr = or();
     
         if (match(EQUAL)) {
             Token equals = previous();
@@ -272,6 +272,9 @@ class Parser {
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable) expr).name;
                 return new Expr.Assign(name, value);
+            } else if (expr instanceof Expr.Subscript) {
+                // Allow subscript assignment
+                return new Expr.AssignSubscript((Expr.Subscript) expr, value);
             }
     
             error(equals, "Invalid assignment target.");
@@ -279,6 +282,7 @@ class Parser {
     
         return expr;
     }
+    
     
 
     private Expr equality() {
@@ -332,15 +336,26 @@ class Parser {
 
     private Expr call() {
         Expr expr = primary();
+    
         while (true) {
             if (match(LEFT_PAREN)) {
                 expr = finishCall(expr);
+            } else if (match(DOT)) {
+                Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
+            } else if (match(LEFT_BRACKET)) {
+                Token bracket = previous();
+                Expr index = expression();
+                consume(RIGHT_BRACKET, "Expect ']' after index.");
+                expr = new Expr.Subscript(expr, bracket, index);
             } else {
                 break;
             }
         }
+    
         return expr;
     }
+    
     
 
     private Expr primary() {

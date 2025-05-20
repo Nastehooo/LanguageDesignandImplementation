@@ -3,6 +3,8 @@ package com.craftinginterpreters.lox;
 import java.util.HashMap;
 import java.util.Map;
 
+
+
 /**
  * Represents an instance of a class in the Lox language.
  * Each instance stores its fields and has a reference to its class. 
