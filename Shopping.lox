@@ -1,0 +1,18 @@
+var is_running = true;
+var shopping_list = "";
+
+while (is_running == true) {
+  var item = input("add an item to the shopping list: ");
+
+  if (item == "") {
+    is_running = false;
+  } else {
+    if (shopping_list == "") {
+      shopping_list = item;
+    } else {
+      shopping_list = shopping_list + ", " + item;
+    }
+  }
+}
+
+print shopping_list;

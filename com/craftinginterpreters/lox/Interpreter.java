@@ -18,6 +18,8 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
       }
       @Override public String toString() { return "<native fn>"; }
     });
+
+    globals.define("input", new InputFunction()); 
   }
 
   void interpret(List<Stmt> statements) {
@@ -104,6 +106,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     return map;
   }
 
+  
   @Override
   public Object visitLoxListExpr(Expr.LoxList expr) {
     // Assuming Expr.LoxList has a List<Expr> elements;
