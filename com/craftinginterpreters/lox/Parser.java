@@ -32,7 +32,6 @@ class Parser {
     }
 
     private Stmt declaration() {
-        System.out.println("Parsing declaration: current token = " + peek());
         try {
             if (match(FUN)) {
                 System.out.println("Matched FUN token");
