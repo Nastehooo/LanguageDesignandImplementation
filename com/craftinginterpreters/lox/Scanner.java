@@ -30,6 +30,16 @@ class Scanner {
         keywords.put("true", TRUE);
         keywords.put("var", VAR);
         keywords.put("while", WHILE);
+        keywords.put("set", SET);
+        keywords.put("build", BUILD);
+        keywords.put("walk", WALK);
+        keywords.put("check", CHECK);
+        keywords.put("otherwise", OTHERWISE);
+        keywords.put("continue", CONTINUE);
+        keywords.put("break", BREAK);
+        keywords.put("thru", THRU);
+        keywords.put("do", DO);
+        
     }
 
     // The source code string to scan

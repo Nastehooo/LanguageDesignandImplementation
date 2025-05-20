@@ -1,9 +1,48 @@
-var list = [1.0, 2.0, 3.0, 4.0];
-print list;
+fun sayHi(name) {
+  print "Hi, " + name + "!";
+}
 
-var dict = {
-  "name": "Alice",
-  "age": 30.0,
-  "isStudent": false
-};
-print dict;
+sayHi("Alice");
+sayHi("Bob");
+
+
+fun add(a, b) {
+  return a + b;
+}
+
+print add(3, 4); // Should print 7
+
+
+fun testScope() {
+  var a = "outer";
+  {
+    var a = "inner";
+    print a; // Should print "inner"
+  }
+  print a; // Should print "outer"
+}
+
+testScope();
+
+
+fun foo() {
+  var x = 42;
+  print x;
+}
+
+fun bar() {
+  // x is not visible here
+  print x; // Should throw a runtime error: undefined variable 'x'
+}
+
+foo();
+
+fun factorial(n) {
+  print "factorial called with " + n;
+  if (n <= 1) return 1;
+  var result = n * factorial(n - 1);
+  print "returning " + result + " for factorial(" + n + ")";
+  return result;
+}
+
+print factorial(5);  // This triggers the factorial computation and prints the final result

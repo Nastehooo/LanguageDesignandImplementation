@@ -1,4 +1,3 @@
-//> Appendix II stmt
 package com.craftinginterpreters.lox;
 
 import java.util.List;
@@ -6,8 +5,6 @@ import java.util.List;
 // Abstract base class representing all statement types in the Lox language.
 abstract class Stmt {
 
-  // Visitor interface defines a generic method for each specific subclass of Stmt.
-  // This is used to implement the Visitor pattern for handling different kinds of statements.
   interface Visitor<R> {
     R visitBlockStmt(Block stmt);
     R visitClassStmt(Class stmt);
@@ -18,9 +15,17 @@ abstract class Stmt {
     R visitReturnStmt(Return stmt);
     R visitVarStmt(Var stmt);
     R visitWhileStmt(While stmt);
+    R visitOtherwiseStmt(Otherwise stmt);
+    R visitSetStmt(Set stmt);
+    R visitBuildStmt(Build stmt);
+    R visitWalkStmt(Walk stmt);
+    R visitCheckStmt(Check stmt);
+    R visitThruStmt(Thru stmt);
+    R visitBreakStmt(Break stmt);
+    R visitContinueStmt(Continue stmt);
+    R visitDoStmt(Do stmt);
   }
 
-  // Block represents a sequence of statements enclosed in curly braces `{ ... }`
   static class Block extends Stmt {
     Block(List<Stmt> statements) {
       this.statements = statements;
@@ -31,10 +36,10 @@ abstract class Stmt {
       return visitor.visitBlockStmt(this);
     }
 
-    final List<Stmt> statements; // The list of statements inside the block
+    // Public field so the parser can extract its contents.
+    final List<Stmt> statements;
   }
 
-  // Class represents a class declaration (e.g., `class Foo { ... }`)
   static class Class extends Stmt {
     Class(Token name,
           Expr.Variable superclass,
@@ -49,12 +54,11 @@ abstract class Stmt {
       return visitor.visitClassStmt(this);
     }
 
-    final Token name;                       // The name of the class
-    final Expr.Variable superclass;         // Optional superclass (for inheritance)
-    final List<Stmt.Function> methods;      // Methods defined in the class
+    final Token name;
+    final Expr.Variable superclass;
+    final List<Stmt.Function> methods;
   }
 
-  // Expression represents a statement that evaluates an expression (e.g., `a + b;`)
   static class Expression extends Stmt {
     Expression(Expr expression) {
       this.expression = expression;
@@ -65,10 +69,9 @@ abstract class Stmt {
       return visitor.visitExpressionStmt(this);
     }
 
-    final Expr expression; // The expression to be evaluated
+    final Expr expression;
   }
 
-  // Function represents a function declaration (e.g., `fun sayHi() { print "Hi"; }`)
   static class Function extends Stmt {
     Function(Token name, List<Token> params, List<Stmt> body) {
       this.name = name;
@@ -81,12 +84,11 @@ abstract class Stmt {
       return visitor.visitFunctionStmt(this);
     }
 
-    final Token name;              // Function name
-    final List<Token> params;      // Parameters (arguments) for the function
-    final List<Stmt> body;         // Body of the function (statements)
+    final Token name;
+    final List<Token> params;
+    final List<Stmt> body;
   }
 
-  // If represents an if statement (e.g., `if (condition) { ... } else { ... }`)
   static class If extends Stmt {
     If(Expr condition, Stmt thenBranch, Stmt elseBranch) {
       this.condition = condition;
@@ -99,12 +101,11 @@ abstract class Stmt {
       return visitor.visitIfStmt(this);
     }
 
-    final Expr condition;      // The condition to be evaluated
-    final Stmt thenBranch;     // Statement to execute if condition is true
-    final Stmt elseBranch;     // Optional statement to execute if condition is false
+    final Expr condition;
+    final Stmt thenBranch;
+    final Stmt elseBranch;
   }
 
-  // Print represents a print statement (e.g., `print "Hello";`)
   static class Print extends Stmt {
     Print(Expr expression) {
       this.expression = expression;
@@ -115,10 +116,9 @@ abstract class Stmt {
       return visitor.visitPrintStmt(this);
     }
 
-    final Expr expression; // The expression to be printed
+    final Expr expression;
   }
 
-  // Return represents a return statement inside a function (e.g., `return 42;`)
   static class Return extends Stmt {
     Return(Token keyword, Expr value) {
       this.keyword = keyword;
@@ -130,11 +130,10 @@ abstract class Stmt {
       return visitor.visitReturnStmt(this);
     }
 
-    final Token keyword; // The 'return' keyword token
-    final Expr value;    // The value being returned (can be null for `return;`)
+    final Token keyword;
+    final Expr value;
   }
 
-  // Var represents a variable declaration (e.g., `var x = 10;`)
   static class Var extends Stmt {
     Var(Token name, Expr initializer) {
       this.name = name;
@@ -146,11 +145,10 @@ abstract class Stmt {
       return visitor.visitVarStmt(this);
     }
 
-    final Token name;          // Name of the variable
-    final Expr initializer;    // Optional initializer expression
+    final Token name;
+    final Expr initializer;
   }
 
-  // While represents a while loop (e.g., `while (condition) { ... }`)
   static class While extends Stmt {
     While(Expr condition, Stmt body) {
       this.condition = condition;
@@ -162,11 +160,131 @@ abstract class Stmt {
       return visitor.visitWhileStmt(this);
     }
 
-    final Expr condition;  // The loop condition expression
-    final Stmt body;       // The body to execute while the condition is true
+    final Expr condition;
+    final Stmt body;
   }
 
-  // Abstract method to be implemented by each subclass, allowing a Visitor to visit it.
+  static class Otherwise extends Stmt {
+    Otherwise() {}
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitOtherwiseStmt(this);
+    }
+  }
+
+  static class Set extends Stmt {
+    Set(Token name, Expr value) {
+      this.name = name;
+      this.value = value;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitSetStmt(this);
+    }
+
+    final Token name;
+    final Expr value;
+  }
+
+  static class Build extends Stmt {
+    Build(Expr target, List<Expr> arguments) {
+      this.target = target;
+      this.arguments = arguments;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitBuildStmt(this);
+    }
+
+    final Expr target;
+    final List<Expr> arguments;
+  }
+
+  static class Walk extends Stmt {
+    Walk(Expr direction) {
+      this.direction = direction;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitWalkStmt(this);
+    }
+
+    final Expr direction;
+  }
+
+  static class Check extends Stmt {
+    Check(Expr condition) {
+      this.condition = condition;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitCheckStmt(this);
+    }
+
+    final Expr condition;
+  }
+
+  static class Thru extends Stmt {
+    Thru(Expr expr) {
+      this.expr = expr;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitThruStmt(this);
+    }
+
+    final Expr expr;
+  }
+
+  static class Break extends Stmt {
+    Break(Token keyword) {
+      this.keyword = keyword;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitBreakStmt(this);
+    }
+
+    final Token keyword;
+  }
+
+  static class Continue extends Stmt {
+    Continue(Token keyword) {
+      this.keyword = keyword;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitContinueStmt(this);
+    }
+
+    final Token keyword;
+  }
+
+  static class Do extends Stmt {
+    Do(Token doKeyword, Stmt body, Expr condition) {
+      this.doKeyword = doKeyword;
+      this.body = body;
+      this.condition = condition;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitDoStmt(this);
+    }
+
+    final Token doKeyword;
+    final Stmt body;
+    final Expr condition;
+  }
+
+  // Abstract method for visitor pattern.
   abstract <R> R accept(Visitor<R> visitor);
 }
-//< Appendix II stmt

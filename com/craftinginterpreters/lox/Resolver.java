@@ -110,26 +110,20 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   // -- Visitor methods for list and dictionary 
   @Override
   public Void visitLoxListExpr(Expr.LoxList expr) {
-      // Resolve each element expression in the list for variable bindings and scope.
       for (Expr element : expr.elements) {
-          resolve(element);  // Recursively resolve the element expression.
+          resolve(element);
       }
-      return null;  // Void return for the resolver visitor.
+      return null;
   }
 
   @Override
   public Void visitLoxDictExpr(Expr.LoxDict expr) {
-      // Resolve each key and value expression in the dictionary for variable bindings and scope.
       for (Map.Entry<Expr, Expr> entry : expr.entries.entrySet()) {
-          resolve(entry.getKey());   // Recursively resolve the key expression.
-          resolve(entry.getValue()); // Recursively resolve the value expression.
+          resolve(entry.getKey());
+          resolve(entry.getValue());
       }
-      return null;  // Void return for the resolver visitor.
+      return null;
   }
-
-
-
-
 
   // --- Visitor methods for statements ---
 
@@ -149,7 +143,6 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     declare(stmt.name);
     define(stmt.name);
 
-    // Prevent class from inheriting itself
     if (stmt.superclass != null &&
         stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
       Lox.error(stmt.superclass.name, "A class can't inherit from itself.");
@@ -160,17 +153,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
       resolve(stmt.superclass);
     }
 
-    // New scope for 'super'
     if (stmt.superclass != null) {
       beginScope();
       scopes.peek().put("super", true);
     }
 
-    // New scope for 'this'
     beginScope();
     scopes.peek().put("this", true);
 
-    // Resolve all methods
     for (Stmt.Function method : stmt.methods) {
       FunctionType declaration = FunctionType.METHOD;
       if (method.name.lexeme.equals("init")) {
@@ -179,9 +169,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
       resolveFunction(method, declaration);
     }
 
-    endScope(); // End 'this' scope
+    endScope();
 
-    if (stmt.superclass != null) endScope(); // End 'super' scope
+    if (stmt.superclass != null) endScope();
 
     currentClass = enclosingClass;
     return null;
@@ -246,6 +236,58 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     return null;
   }
 
+  // -- New visitor methods for your custom statements ---
+
+  @Override
+  public Void visitThruStmt(Stmt.Thru stmt) {
+    // Resolve fields inside Thru statement.
+    // e.g., resolve(stmt.someExpression);
+    // or resolve(stmt.bodyStatements);
+    // Replace with actual fields in your Stmt.Thru class:
+    // Example:
+    // if (stmt.condition != null) resolve(stmt.condition);
+    // resolve(stmt.body);
+    return null;
+  }
+
+  @Override
+  public Void visitWalkStmt(Stmt.Walk stmt) {
+    // Resolve inside Walk statement
+    // e.g., resolve(stmt.expression);
+    return null;
+  }
+
+  @Override
+  public Void visitBuildStmt(Stmt.Build stmt) {
+    // Resolve inside Build statement
+    // e.g., resolve(stmt.someExpr);
+    return null;
+  }
+
+  @Override
+  public Void visitCheckStmt(Stmt.Check stmt) {
+    // Resolve condition and branches inside Check statement
+    // Example:
+    // resolve(stmt.condition);
+    // resolve(stmt.thenBranch);
+    // if (stmt.elseBranch != null) resolve(stmt.elseBranch);
+    return null;
+  }
+
+  @Override
+  public Void visitOtherwiseStmt(Stmt.Otherwise stmt) {
+    // Resolve body of Otherwise statement
+    // e.g., resolve(stmt.body);
+    return null;
+  }
+
+  @Override
+  public Void visitSetStmt(Stmt.Set stmt) {
+    // Resolve value or expression inside Set statement
+    // e.g., resolve(stmt.value);
+    return null;
+  }
+
   // --- Visitor methods for expressions ---
 
   @Override
@@ -285,7 +327,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitLiteralExpr(Expr.Literal expr) {
-    return null; // No resolution needed for literals
+    return null;
   }
 
   @Override
@@ -337,4 +379,28 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     resolveLocal(expr, expr.name);
     return null;
   }
+
+  @Override
+  public Void visitBreakStmt(Stmt.Break stmt) {
+    // You can add loop context validation logic here if desired.
+    return null;
+  }
+
+  @Override
+  public Void visitContinueStmt(Stmt.Continue stmt) {
+    // Same as above — for static analysis or validation.
+    return null;
+  }
+
+  @Override
+  public Void visitDoStmt(Stmt.Do stmt) {
+      // Resolve the body of the do-while loop
+      resolve(stmt.body);
+      // Resolve the condition expression
+      resolve(stmt.condition);
+      return null;
+  }
+
+  
+
 }
