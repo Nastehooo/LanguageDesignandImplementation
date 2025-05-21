@@ -3,22 +3,22 @@ package com.craftinginterpreters.lox;
 import java.util.List;
 import java.util.Scanner;
 
-class InputFunction implements LoxCallable {
-    private static final Scanner scanner = new Scanner(System.in);
+public class InputFunction implements LoxCallable {
+  private static final Scanner scanner = new Scanner(System.in);
 
-    @Override
-    public int arity() {
-        return 1;  // Takes 1 argument: the prompt string
-    }
+  @Override
+  public int arity() {
+    return 1; // expects one string argument for prompt
+  }
 
-    @Override
-    public Object call(Interpreter interpreter, List<Object> arguments) {
-        System.out.print(arguments.get(0));  // Print prompt
-        return scanner.nextLine();
-    }
+  @Override
+  public Object call(Interpreter interpreter, List<Object> arguments) {
+    System.out.print(arguments.get(0));  // print the prompt
+    return scanner.nextLine();           // return the user input
+  }
 
-    @Override
-    public String toString() {
-        return "<native fn input>";
-    }
+  @Override
+  public String toString() {
+    return "<native fn>";
+  }
 }

@@ -112,6 +112,10 @@ class Scanner {
             case '*':
                 addToken(STAR);
                 break;
+            case '%':
+                addToken(PERCENT);
+                break;
+            
 
             // Handle one or two character operators
             case '!':
@@ -197,25 +201,33 @@ class Scanner {
 
     // Handles string literals
     private void string() {
-        // Consume characters until closing quote or end of file
-        while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n')
-                line++; // Handle multiline strings
-            advance();
+        StringBuilder value = new StringBuilder();
+        while (!isAtEnd()) {
+            char c = advance();
+            if (c == '"') {
+                // End of string
+                break;
+            }
+            if (c == '\\') {
+                if (isAtEnd()) break;
+                char next = advance();
+                switch (next) {
+                    case 'n': value.append('\n'); break;
+                    case 't': value.append('\t'); break;
+                    case '"': value.append('"'); break;
+                    case '\\': value.append('\\'); break;
+                    default:
+                        // Handle unknown escape sequence error or just add next literally
+                        value.append(next);
+                        break;
+                }
+            } else {
+                value.append(c);
+            }
         }
-
-        if (isAtEnd()) {
-            Lox.error(line, "Unterminated string.");
-            return;
-        }
-
-        advance(); // Consume the closing quote
-
-        // Extract the string value without quotes
-        String value = source.substring(start + 1, current - 1);
-        addToken(STRING, value);
+        addToken(STRING, value.toString());
     }
-
+    
     // Check if next character matches the expected one
     private boolean match(char expected) {
         if (isAtEnd())

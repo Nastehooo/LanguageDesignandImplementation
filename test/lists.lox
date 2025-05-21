@@ -1,7 +1,8 @@
-// Stage 6 - Lists 
-list = [1, 2, 3];
-print list[0];                     // 1
-list[1] = 42;
-print list[1];                     // 42
-list.add(99);
-print list;                        // [1, 42, 3, 99]
+// Stage 6 - List 
+var myList = [];
+myList.push(1);
+myList.push(2);
+myList.push(3);
+print myList[1];     // Should print: 2
+myList.remove(1);
+print myList;        // Should print: [1, 3]

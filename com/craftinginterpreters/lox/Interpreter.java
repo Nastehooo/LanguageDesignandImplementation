@@ -25,6 +25,45 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     // Add the native global "myList" here
     globals.define("myList", new LoxList());
+
+     // Native function to remove a key from dictionary
+     globals.define("dictRemove", new LoxCallable() {
+      @Override public int arity() { return 2; }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
+          Object dictObj = arguments.get(0);
+          Object key = arguments.get(1);
+
+          if (!(dictObj instanceof LoxDict)) {
+              throw new RuntimeError(null, "First argument to dictRemove must be a dictionary.");
+          }
+
+          ((LoxDict) dictObj).remove(key);
+          return null;
+      }
+
+      @Override public String toString() { return "<native fn dictRemove>"; }
+  });
+
+  // Native function to check if dictionary contains a key
+  globals.define("dictContainsKey", new LoxCallable() {
+      @Override public int arity() { return 2; }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
+          Object dictObj = arguments.get(0);
+          Object key = arguments.get(1);
+
+          if (!(dictObj instanceof LoxDict)) {
+              throw new RuntimeError(null, "First argument to dictContainsKey must be a dictionary.");
+          }
+
+          return ((LoxDict) dictObj).containsKey(key);
+      }
+
+      @Override public String toString() { return "<native fn dictContainsKey>"; }
+  });
 }
 
   void interpret(List<Stmt> statements) {
@@ -333,18 +372,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         checkNumberOperands(expr.operator, left, right);
         return (double) left - (double) right;
         case PLUS:
-        // If either operand is a string, convert both to strings and concatenate
-        if (left instanceof String || right instanceof String) {
-          return stringify(left) + stringify(right);
-        }
-      
-        // Try to convert both operands to Double before adding
-        if (left instanceof Number && right instanceof Number) {
-          return ((Number) left).doubleValue() + ((Number) right).doubleValue();
-        }
-      
-        throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
-      
+            if (left instanceof String && right instanceof String) {
+                return (String) left + (String) right;
+            }
+            if (left instanceof Number && right instanceof Number) {
+                return ((Number) left).doubleValue() + ((Number) right).doubleValue();
+            }
+            throw new RuntimeError(expr.operator, "Operands must be both numbers or both strings.");
+    
+     case PERCENT: {
+          checkNumberOperands(expr.operator, left, right);
+          double leftNum = ((Number) left).doubleValue();
+          double rightNum = ((Number) right).doubleValue();
+          return leftNum % rightNum;
+      }
+               
       case SLASH:
         checkNumberOperands(expr.operator, left, right);
         return (double) left / (double) right;

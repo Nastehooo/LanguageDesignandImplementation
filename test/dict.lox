@@ -1,11 +1,11 @@
-// Stage 6 - Dictionary 
-dict = dict();
-dict["name"] = "corgi";
-dict["age"] = 3;
+// Stage 6 - Dictionary
+var myDict = {}; 
+myDict["name"] = "corgi";
+myDict["age"] = 3;
 
-print dict["name"];                // corgi
-print dict["age"];                 // 3
+print myDict["name"];            // corgi
+print myDict["age"];             // 3
 
-dict.remove("age");
-print dict.containsKey("age");     // false
-print dict;                         // {name=corgi}
+dictRemove(myDict, "age");
+print dictContainsKey(myDict, "age");  // false
+print myDict;                          // {name=corgi}
