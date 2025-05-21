@@ -1,4 +1,0 @@
-var myDict = {};
-myDict["name"] = "corgi";
-myDict["age"] = 3;
-print myDict["name"];

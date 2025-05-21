@@ -1,0 +1,17 @@
+// Stage 4
+quickMaths = 10;
+quickMaths = quickMaths + 2;
+print quickMaths;                   // 12
+
+floatTest = 1.0;
+floatTest = floatTest + 5;
+print floatTest;                    // 6
+
+stringCatTest = "10 corgis";
+stringCatTest = stringCatTest + 5 + " more corgis";
+print stringCatTest;                // 10 corgis5 more corgis
+
+errorTest = 5;
+// Uncomment to test type error handling:
+// errorTest = errorTest + "insert string here"; 
+// print errorTest;

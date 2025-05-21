@@ -1,0 +1,17 @@
+var i = 0;
+var sum = 0;
+
+while (i <= 5) {
+  print i;
+  sum = sum + i;
+  print sum;
+
+  if (sum > 5) {
+    print "greater than 5";
+  } else {
+    print "not less than 5";
+  }
+
+  i = i + 1;
+}
+

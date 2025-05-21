@@ -1,0 +1,7 @@
+// Stage 6 - Lists 
+list = [1, 2, 3];
+print list[0];                     // 1
+list[1] = 42;
+print list[1];                     // 42
+list.add(99);
+print list;                        // [1, 42, 3, 99]

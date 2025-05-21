@@ -1,0 +1,4 @@
+// Stage 3
+print "hello" + " " + "world";      // hello world
+print "foo" + "bar" == "foobar";    // true
+print "10 corgis" != "10" + "corgis"; // false

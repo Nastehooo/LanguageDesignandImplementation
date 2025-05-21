@@ -1,0 +1,11 @@
+// Stage 6 - Dictionary 
+dict = dict();
+dict["name"] = "corgi";
+dict["age"] = 3;
+
+print dict["name"];                // corgi
+print dict["age"];                 // 3
+
+dict.remove("age");
+print dict.containsKey("age");     // false
+print dict;                         // {name=corgi}

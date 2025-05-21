@@ -1,0 +1,15 @@
+// Stage 6 - Locals 
+fun demoScope() {
+  var x = 10;
+  print x;                  // 10
+  {
+    var x = 20;
+    print x;                // 20
+  }
+  print x;                  // 10
+}
+
+demoScope();
+
+var x = "global";
+print x;                    // global

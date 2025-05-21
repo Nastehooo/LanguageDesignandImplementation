@@ -163,26 +163,19 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
       return new LoxDict(map);
   }
   
-
-
-
-
-  
-  
   @Override
   public Object visitLoxListExpr(Expr.LoxList expr) {   
   LoxList loxList = new LoxList();
   for (Expr element : expr.elements) {
     loxList.add(evaluate(element));
   }
-  return loxList;
-}
+      return loxList;
+  }
 
 
   @Override
   public Void visitExpressionStmt(Stmt.Expression stmt) {
-      Object value = evaluate(stmt.expression);
-      System.out.println(stringify(value));  // Print the result of the expression
+      evaluate(stmt.expression);
       return null;
   }
 
@@ -210,6 +203,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     System.out.println(stringify(value));
     return null;
   }
+
 
   @Override
   public Void visitReturnStmt(Stmt.Return stmt) {
@@ -290,17 +284,18 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitWhileStmt(Stmt.While stmt) {
-    while (isTruthy(evaluate(stmt.condition))) {
-      try {
-        execute(stmt.body);
-      } catch (BreakException e) {
-        break;
-      } catch (ContinueException e) {
-        // continue next iteration
-      }
+  while (isTruthy(evaluate(stmt.condition))) {
+    try {
+      execute(stmt.body);
+    } catch (BreakException e) {
+      break;
+    } catch (ContinueException e) {
+      // continue next iteration
     }
-    return null;
   }
+  return null;
+}
+
 
   @Override
   public Object visitAssignExpr(Expr.Assign expr) {

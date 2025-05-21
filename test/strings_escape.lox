@@ -1,0 +1,3 @@
+print "Line 1\nLine2";     // should print two lines
+print "Tab\tSeparated";    // tab in output 
+print "Quote: \"Hello\"";  //escaped quote

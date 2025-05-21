@@ -1,0 +1,8 @@
+print "5" + 5;              // Should raise type error (if your language is strict)
+
+a = true + "hello";         // Should raise type error
+
+b = 10 / "2";               // Should raise type error
+
+print a;                    // Should not reach here if interpreter halts on error
+print b;

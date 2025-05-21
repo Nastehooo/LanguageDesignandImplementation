@@ -1,0 +1,9 @@
+// Stage 2
+print true == false;                 // false
+print true != false;                // true
+print (5 < 10);                     // true
+print !(5 - 4 > 3 * 2 == !false);   // true
+print true and true;                // true
+print false and true;              // false
+print (0 < 1) or false;             // true
+print false or false;              // false
