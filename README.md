@@ -31,8 +31,8 @@ java -cp bin com.craftinginterpreters.lox.Lox test/your_script.lox
 
 # How to Build the Lox Interpreter:
 Requirements:
- - Java JDK installed (version 8 or higher)
- - Terminal or command prompt
+ * Java JDK installed (version 8 or higher)
+ * Terminal or command prompt
 
 # Compile the Project: 
 
